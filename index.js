@@ -1,108 +1,91 @@
-const { Client, Collection, Events, GatewayIntentBits, Message } = require('discord.js');
-const { token, adminIds } = require('./config.json');
+const { Client, Collection, Events, GatewayIntentBits, Message, ActionRowBuilder, ButtonBuilder, ButtonStyle, UserSelectMenuBuilder } = require('discord.js');
+const { token, adminIds, dbName, devDatabaseName } = require('./config.json');
 const Keyv = require('keyv');
+const {parseTime, createTagButtonRow} = require("./utils")
 
 const fs = require('node:fs');
 const path = require('node:path');
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers] });
 
-client.commands = new Collection();
-
-const dbFile = "database.sqlite"
-if (!fs.existsSync("./" + dbFile)) {
-	fs.writeSync("./" + dbFile)
+if (!fs.existsSync("./" + dbName)) {
+	fs.writeSync("./" + dbName)
 }
-const db = new Keyv('sqlite://'+dbFile);
+const db = new Keyv('sqlite://'+dbName);
+const devDatabase = new Keyv('sqlite://'+devDatabaseName);
 
-const CHANNEL_NAME = "general" //"bot-shit"
-const TAG_CHANNEL = "tagged-someone" //"test-tagged-someone"
+
+//Finds Commands
+client.commands = new Collection();
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
-// for (const file of commandFiles) {
-// 	const filePath = path.join(commandsPath, file);
-// 	const command = require(filePath);
-// 	// Set a new item in the Collection with the key as the command name and the value as the exported module
-// 	if ('data' in command && 'execute' in command) {
-// 		client.commands.set(command.data.name, command);
-// 	} else {
-// 		console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
-// 	}
-// }
+for (const file of commandFiles) {
+	const filePath = path.join(commandsPath, file);
+	const command = require(filePath);
+	client.commands.set(command.data.name, command);
+}
 
+//Ready Event
 client.once(Events.ClientReady, c => {
 	console.log(`Ready! Logged in as ${c.user.tag}`);
 });
 
-client.on(Events.MessageCreate, async message => {
-	const id = message.author.username;
 
-	if (message.author.bot) return;
-	if (message.channel.name == TAG_CHANNEL) {
-		if (!message.author.bot && message.content !== "$tagged") {
-			message.delete()
-		} else {
-			const messages = await message.channel.messages.fetch({limit: 2})
-			const lastMsg = messages.last();
-			const seconds = Math.round((message.createdTimestamp - lastMsg.createdTimestamp)/1000)
-			await db.set(id, (await getTime(id)) + seconds)
-			message.channel.send(`${message.author.toString()} has now been tagged for ${await getTime(id)} seconds`)
-		}
-	} 
-	if (!message.content.startsWith("$")) return
+client.on(Events.InteractionCreate, async interaction => {
+	//Slash Commands
+	if (interaction.isChatInputCommand()) {
+		const command = client.commands.get(interaction.commandName);
 
-	const command = message.content.replace("$", "").split(" ")[0]
-	console.log(command);
-	if (message.channel.name == CHANNEL_NAME) {
-		if (command == "init") {
-			if (await db.get(id) !== undefined) {
-				message.channel.send(`${message.author.toString()} has already been initiated`)
-				return
-			} else {
-				db.set(id, 0)
-				message.channel.send(`Initiated user ${message.author.toString()}`)
-			}
-		
-		}
-		if (command == "ping") {
-			message.reply("pong")
-		}
-		if (command == "user") {
-			const time = await db.get(id)
-			if (time == undefined) {
-				message.channel.send(`${message.author.toString()} cannot be found`)
-			} else message.channel.send(`${message.author.toString()} has been tagged for ${time} seconds`)
-		} if (command == "reset" && adminIds.includes(message.author.id)) {
-			db.clear()
-			message.channel.send("The database has been reset!")
+		if (!command) return;
+	
+		try {
+			await command.execute(interaction);
+		} catch (error) {
+			console.error(error);
+			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
 		}
 	}
+	//When someone clicks the "I tagged someone Button"
+	if (interaction.isButton() && interaction.customId == "tag_button") {
+		const curr = await db.get("current")
+		const time = Date.now() - (await db.get('last_tag'))
+		const cooldown = 15*60*1000
+		console.log(time, parseTime(cooldown));
 
-})
+		//Filters out if the user isn't "it" and the cooldown
+		if (curr !== interaction.user.username) {
+			interaction.reply({ content: 'You are not it! You can\'t tag someone right now you silly goose!', ephemeral: true })
+		} else if (time < cooldown) {
+			interaction.reply({ content: `Not yet you impatient fuck! You need to wait for ${parseTime(cooldown - time)}`, ephemeral: true })
+		} else {
+			//creates Dropdown Menue
+			const userSelect = new ActionRowBuilder().addComponents(
+      	new UserSelectMenuBuilder()
+       	  .setCustomId('userSelect')
+       	  .setPlaceholder('Nothing selected')
+					.setMaxValues(1)
+   	  );
+			await interaction.reply({content: `Who did you tag ${interaction.user.username}? It's okay, you can tell me`, ephemeral: true, components: [userSelect]})
+			console.log("[tagging_button]");
+			interaction.message.delete()
+		}
+	}
+	//When the user selects who they tagged
+	if (interaction.isUserSelectMenu() && interaction.customId == "userSelect") {
+		await interaction.reply(`${interaction.user.username} has tagged someone!`)
+		const milliseconds = Date.now() - await db.get("last_tag")
+		console.log("[userSelect] - time added", milliseconds)
+		console.log("[userSelect]{interaction.message}", interaction.message);
+		//Updates user's time
+		await db.set(interaction.user.username, (await db.get(interaction.user.username)) + milliseconds)
 
-
-
-// client.on(Events.InteractionCreate, async interaction => {
-// 	if (!interaction.isChatInputCommand()) return;
+		interaction.followUp({ content: 'Let the glorious game of Tag continue!', components: [createTagButtonRow()] })
+		
+		db.set("current", interaction.users.first().username)
+		db.set("last_tag", Date.now())
+	}
 	
-// 	const command = interaction.client.commands.get(interaction.commandName);
-
-// 	if (!command) {
-// 		console.error(`No command matching ${interaction.commandName} was found.`);
-// 		return;
-// 	}
-
-// 	try {
-// 		await command.execute(interaction);
-// 	} catch (error) {
-// 		console.error(error);
-// 		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-// 	}
-// });
+});
 
 client.login(token);
-
-const getTime = async (id) => {
-	return await db.get(id)
-}
