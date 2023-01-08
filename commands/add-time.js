@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, } = require('discord.js');
 const { dbName, adminIds } = require("../config.json")
+const { getNickname, parseTime } = require("../utils")
 const Keyv = require('keyv');
 
 module.exports = {
@@ -8,9 +9,9 @@ module.exports = {
 		.setDescription('Adds time to a given user')
     .addUserOption(option => option.setName("user").setDescription("User to be add time to. Defaults to sender.").setRequired(true))
     .addIntegerOption(option => option.setName("seconds").setDescription("Amount of time in seconds to add").setRequired(true)),
-	async execute(interaction) {
-    const db = new Keyv('sqlite://'+dbName);
-    const user = interaction.options.getUser('user') || interaction.user;
+	async execute(interaction, db) {
+    // const db = new Keyv('sqlite://'+dbName);
+    const userId = interaction.options.getUser('user').id;
     const time = interaction.options.getInteger('seconds')*1000
     
     //Filter out only Admins
@@ -18,8 +19,9 @@ module.exports = {
       interaction.reply("Sorry, but you can't use this command!")
       return
     }
-    console.log((await db.get(user.username))+time);
-    db.set(user.username, (await db.get(user.username))+time)
-    interaction.reply(`Successfully added ${time} milliseconds to ${user.username}`)
+
+    console.log("Added time", time, (await db.get(userId))+time);
+    db.set(userId, (await db.get(userId))+time)
+    interaction.reply(`Successfully added ${parseTime(time)} to ${await getNickname(interaction, userId)}`)
   }
 }

@@ -7,8 +7,8 @@ module.exports = {
 		.setName('set-last-tagged')
 		.setDescription('Overrides who is currently it, does not reset when the last tag happened')
     .addIntegerOption(option => option.setName("time").setDescription("time to assign to the `last_tag` in milliseconds since the epoch").setRequired(true)),
-	async execute(interaction) {
-    const db = new Keyv('sqlite://'+dbName);
+	async execute(interaction, db) {
+    // const db = new Keyv('sqlite://'+dbName);
     const time = interaction.options.getInteger("time")
     const date = new Date(time)
     
