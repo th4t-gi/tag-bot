@@ -8,6 +8,7 @@ module.exports = {
 		.setDescription('Initiates everyone in the discord server as players')
     .addBooleanOption(option => option.setName("force").setDescription("Initializes user forcefully, will reset a user's time if already initiated.")),
 	async execute(interaction, db) {
+    const force = interaction.options.getBoolean("force") || false;
     if (!adminIds.includes(interaction.user.id)) {
       interaction.reply("Sorry, but you can't use this command!")
       return
@@ -23,7 +24,7 @@ module.exports = {
       await members.filter(m => !m.user.bot).forEach(async m => {
         console.log(m.user.username, m.user.id);
         //initiate user
-        if (await db.get(m.user.id) !== undefined) {
+        if (await db.get(m.user.id) !== undefined && !force) {
           interaction.channel.send(`${m.nickname||m.user.username} has already been initiated`)
         } else {
           db.set(m.user.id, 0)

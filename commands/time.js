@@ -19,7 +19,7 @@ module.exports = {
     console.log("[/time]{time}", time);
 
     if (time == undefined)
-      interaction.reply(`${getNickname(interaction, user.id)} cannot be found`);
+      interaction.reply(`${await getNickname(interaction, user.id)} cannot be found`);
     else
       interaction.reply(
         `${await getNickname(interaction, user.id)} has been tagged for ${parseTime(time)}`

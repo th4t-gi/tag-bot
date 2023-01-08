@@ -19,9 +19,11 @@ module.exports = {
       interaction.reply("Sorry, but you can't use this command!")
       return
     }
-
-    console.log("Added time", time, (await db.get(userId))+time);
-    db.set(userId, (await db.get(userId))+time)
-    interaction.reply(`Successfully added ${parseTime(time)} to ${await getNickname(interaction, userId)}`)
+    if (!((await db.get(userId))+1)) interaction.reply(`${await getNickname(interaction, userId)} cannot be found`)
+    else {
+      console.log("Added time", time, (await db.get(userId))+time);
+      db.set(userId, (await db.get(userId))+time)
+      interaction.reply(`Successfully added ${parseTime(time)} to ${await getNickname(interaction, userId)}`)
+    }
   }
 }

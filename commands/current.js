@@ -10,6 +10,7 @@ module.exports = {
 	async execute(interaction, db) {
     // const db = new Keyv('sqlite://'+dbName);
     const userIsTagged = interaction.user.id == (await db.get("current"))
+    console.log(await db.get("current"));
     console.log("[/current]{last_tag}", await db.get('last_tag'));
 
     const time = Date.now() - (await db.get("last_tag"))
