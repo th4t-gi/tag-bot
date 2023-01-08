@@ -1,7 +1,7 @@
 const { Client, Collection, Events, GatewayIntentBits, Message, ActionRowBuilder, ButtonBuilder, ButtonStyle, UserSelectMenuBuilder } = require('discord.js');
 const { token, adminIds, dbName, devDatabaseName } = require('./config.json');
 const Keyv = require('keyv');
-const {parseTime, createTagButtonRow, updateStandings} = require("./utils")
+const {parseTime, createTagButtonRow, updateStandings, getNickname} = require("./utils")
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -66,14 +66,14 @@ client.on(Events.InteractionCreate, async interaction => {
        	  .setPlaceholder('Nothing selected')
 					.setMaxValues(1)
    	  );
-			await interaction.reply({content: `Who did you tag ${interaction.user.id}? It's okay, you can tell me`, ephemeral: true, components: [userSelect]})
+			await interaction.reply({content: `Who did you tag ${await getNickname(interaction, interaction.user.id)}? It's okay, you can tell me`, ephemeral: true, components: [userSelect]})
 			console.log("[tagging_button]");
 			interaction.message.delete()
 		}
 	}
 	//When the user selects who they tagged
 	if (interaction.isUserSelectMenu() && interaction.customId == "userSelect") {
-		await interaction.reply(`${interaction.user.id} has tagged someone!`)
+		await interaction.reply(`<@${interaction.user.id}> has tagged someone!`)
 		const milliseconds = Date.now() - await db.get("last_tag")
 		console.log("[userSelect] - time added", milliseconds)
 		console.log("[userSelect]{interaction.message}", interaction.message);
@@ -83,7 +83,7 @@ client.on(Events.InteractionCreate, async interaction => {
 		interaction.followUp({ content: 'Let the glorious game of Tag continue!', components: [createTagButtonRow()] })
 		
 		updateStandings(interaction, db)
-		
+
 		db.set("current", interaction.users.first().id)
 		db.set("last_tag", Date.now())
 	}
