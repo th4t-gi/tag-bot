@@ -59,6 +59,7 @@ client.on(Events.InteractionCreate, async interaction => {
 		} else if (time < cooldown) {
 			interaction.reply({ content: `Not yet you impatient fuck! You need to wait for ${parseTime(cooldown - time)}`, ephemeral: true })
 		} else {
+			interaction.deferReply({ephemeral: true})
 			//creates Dropdown Menue
 			const userSelect = new ActionRowBuilder().addComponents(
       	new UserSelectMenuBuilder()
@@ -66,7 +67,7 @@ client.on(Events.InteractionCreate, async interaction => {
        	  .setPlaceholder('Nothing selected')
 					.setMaxValues(1)
    	  );
-			await interaction.reply({content: `Who did you tag ${await getNickname(interaction, interaction.user.id)}? It's okay, you can tell me`, ephemeral: true, components: [userSelect]})
+			await interaction.editReply({content: `Who did you tag ${await getNickname(interaction, interaction.user.id)}? It's okay, you can tell me`, ephemeral: true, components: [userSelect]})
 			console.log("[tagging_button]");
 			interaction.message.delete()
 		}
@@ -89,5 +90,7 @@ client.on(Events.InteractionCreate, async interaction => {
 	}
 	
 });
+
+client.on(Events.Error, console.log)
 
 client.login(token);
