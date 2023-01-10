@@ -10,11 +10,11 @@ module.exports = {
 		.setDescription('Prints out the list of all players and their times'),
 	async execute(interaction, db) {
     const standingsChannelId = "1061475249796948048"
-    interaction.reply(`UPDATE: Check <#${standingsChannelId}> now instead!, you don't have to use the command!`)
     // await interaction.deferReply()
     // const db = new Keyv('sqlite://'+dbName);
 
     // const standings = updateStandings(interaction, db)
+    interaction.reply(`UPDATE: Check <#${standingsChannelId}> now instead!, you don't have to use the command!`)
     // //Make Standings object
     // let standings = [];
     // for await (const [key, time] of db.iterator()) {

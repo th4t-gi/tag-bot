@@ -11,9 +11,9 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 if (!fs.existsSync("./" + dbName)) {
 	fs.writeSync("./" + dbName)
 }
-const db = new Keyv('sqlite://'+dbName);
+const prodDatabase = new Keyv('sqlite://'+dbName);
 const devDatabase = new Keyv('sqlite://'+devDatabaseName);
-
+const db = prodDatabase
 
 //Finds Commands
 client.commands = new Collection();
@@ -91,6 +91,12 @@ client.on(Events.InteractionCreate, async interaction => {
 	
 });
 
-client.on(Events.Error, console.log)
+process.on('unhandledRejection', async error => {
+	console.error('Unhandled promise rejection:', error);
+	const botChannel = await client.channels.fetch("1060038702837014628")
+	botChannel.send("An error just occurred:\n" + error.message)
+});
+
+// client.on(Events.Error, })
 
 client.login(token);
