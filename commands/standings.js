@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { updateStandings } = require('../utils');
+const { adminIds } = require("../config.json")
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -10,7 +11,7 @@ module.exports = {
     // await interaction.deferReply()
     // const db = new Keyv('sqlite://'+dbName);
 
-    if (dev) updateStandings(interaction, db)
+    if (dev || adminIds.includes(interaction.user.id)) updateStandings(interaction, db)
     interaction.reply(`UPDATE: Check <#${standingsChannelId}> now instead!, you don't have to use the command!`)
     // //Make Standings object
     // let standings = [];
