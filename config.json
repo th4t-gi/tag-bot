@@ -4,5 +4,5 @@
   "guildId": "1037490954778710078",
   "dbName": "database.sqlite",
   "devDatabaseName": "dev.sqlite",
-  "dev": true
+  "dev": false
 }
