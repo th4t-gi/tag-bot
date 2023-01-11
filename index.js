@@ -10,6 +10,7 @@ const path = require('node:path');
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers] });
 
 if (!fs.existsSync("./" + dbName)) {
+	console.log("generating Database");
 	fs.writeFileSync("./" + dbName, "")
 }
 const db = dev ? new Keyv('sqlite://'+dbName) : new Keyv('sqlite://'+devDatabaseName);
