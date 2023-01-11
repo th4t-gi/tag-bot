@@ -1,5 +1,6 @@
-const { Client, Collection, Events, GatewayIntentBits, Message, ActionRowBuilder, ButtonBuilder, ButtonStyle, UserSelectMenuBuilder } = require('discord.js');
-const { token, adminIds, dbName, devDatabaseName } = require('./config.json');
+require('dotenv').config()
+const { Client, Collection, Events, GatewayIntentBits, Message, ActionRowBuilder, ButtonBuilder, ButtonStyle, UserSelectMenuBuilder, ActivityType } = require('discord.js');
+const { dbName, devDatabaseName, dev } = require('./config.json');
 const Keyv = require('keyv');
 const {parseTime, createTagButtonRow, updateStandings, getNickname} = require("./utils")
 
@@ -11,9 +12,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 if (!fs.existsSync("./" + dbName)) {
 	fs.writeSync("./" + dbName)
 }
-const prodDatabase = new Keyv('sqlite://'+dbName);
-const devDatabase = new Keyv('sqlite://'+devDatabaseName);
-const db = prodDatabase
+const db = dev ? new Keyv('sqlite://'+dbName) : new Keyv('sqlite://'+devDatabaseName);
 
 //Finds Commands
 client.commands = new Collection();
@@ -28,11 +27,14 @@ for (const file of commandFiles) {
 
 //Ready Event
 client.once(Events.ClientReady, c => {
+	if (dev) client.user.setActivity("the bot crash over and over", {type: ActivityType.Watching})
+	else client.user.setActivity("tag", {type: ActivityType.Playing})
 	console.log(`Ready! Logged in as ${c.user.tag}`);
 });
 
 
 client.on(Events.InteractionCreate, async interaction => {
+	// await interaction.deferReply({ephemeral: true})
 	//Slash Commands
 	if (interaction.isChatInputCommand()) {
 		const command = client.commands.get(interaction.commandName);
@@ -40,7 +42,7 @@ client.on(Events.InteractionCreate, async interaction => {
 		if (!command) return;
 	
 		try {
-			await command.execute(interaction, db);
+			await command.execute(interaction, db, dev);
 		} catch (error) {
 			console.error(error);
 			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
@@ -59,7 +61,7 @@ client.on(Events.InteractionCreate, async interaction => {
 		} else if (time < cooldown) {
 			interaction.reply({ content: `Not yet you impatient fuck! You need to wait for ${parseTime(cooldown - time)}`, ephemeral: true })
 		} else {
-			interaction.deferReply({ephemeral: true})
+			await interaction.deferReply({ephemeral: true})
 			//creates Dropdown Menue
 			const userSelect = new ActionRowBuilder().addComponents(
       	new UserSelectMenuBuilder()
@@ -99,4 +101,4 @@ process.on('unhandledRejection', async error => {
 
 // client.on(Events.Error, })
 
-client.login(token);
+client.login(process.env.DISCORD_TOKEN);

@@ -1,19 +1,16 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { dbName } = require("../config.json")
-const Keyv = require('keyv');
-const moment = require("moment");
-const { parseTime, updateStandings } = require('../utils');
+const { SlashCommandBuilder } = require('discord.js');
+const { updateStandings } = require('../utils');
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('standings')
 		.setDescription('Prints out the list of all players and their times'),
-	async execute(interaction, db) {
+	async execute(interaction, db, dev) {
     const standingsChannelId = "1061475249796948048"
     // await interaction.deferReply()
     // const db = new Keyv('sqlite://'+dbName);
 
-    // const standings = updateStandings(interaction, db)
+    if (dev) updateStandings(interaction, db)
     interaction.reply(`UPDATE: Check <#${standingsChannelId}> now instead!, you don't have to use the command!`)
     // //Make Standings object
     // let standings = [];

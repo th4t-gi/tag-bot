@@ -1,7 +1,6 @@
-const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, } = require('discord.js');
-const { dbName, adminIds } = require("../config.json")
+const { SlashCommandBuilder } = require('discord.js');
+const { adminIds } = require("../config.json")
 const { getNickname, parseTime } = require("../utils")
-const Keyv = require('keyv');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -23,7 +22,8 @@ module.exports = {
     else {
       console.log("Added time", time, (await db.get(userId))+time);
       db.set(userId, (await db.get(userId))+time)
-      interaction.reply(`Successfully added ${parseTime(time)} to ${await getNickname(interaction, userId)}`)
+      let neg = time < 1
+      interaction.reply(`Successfully ${neg ? "removed" : "added"} ${parseTime(time)} to ${await getNickname(interaction, userId)}`)
     }
   }
 }

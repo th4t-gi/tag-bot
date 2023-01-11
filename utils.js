@@ -14,6 +14,8 @@ module.exports = {
   },
 
   parseTime: (ms) => {
+    ms = Math.abs(ms)
+
     const seconds = ms/1000
     let h = Math.floor(seconds/3600);
     let m = Math.floor((seconds - (h * 3600)) / 60);

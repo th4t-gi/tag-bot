@@ -1,6 +1,6 @@
 # Ignore all files in the node_modules directory
 node_modules/
-config.json
+.env
 # Ignore all files with the .log extension
 *.log
 

@@ -1,0 +1,8 @@
+{
+  "adminIds": ["238809958911705090", "530987809180483584"],
+  "clientId": "1060041543848841306",
+  "guildId": "1037490954778710078",
+  "dbName": "database.sqlite",
+  "devDatabaseName": "dev.sqlite",
+  "dev": true
+}
