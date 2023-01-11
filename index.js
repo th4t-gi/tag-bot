@@ -58,7 +58,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
 		//Filters out if the user isn't "it" and the cooldown
 		if (curr !== interaction.user.id) {
-			interaction.reply({ content: 'You are not it! You can\'t tag someone right now you silly goose!', ephemeral: true })
+			interaction.reply({ content: 'You are not it! You can\'t tag someone right now you silly goose! If you are it and the dumdum that tagged you selected the wrong person, use the /set-tagged command.', ephemeral: true })
 		} else if (time < cooldown) {
 			interaction.reply({ content: `Not yet you impatient fuck! You need to wait for ${parseTime(cooldown - time)}`, ephemeral: true })
 		} else {

@@ -15,9 +15,8 @@ module.exports = {
 
     const time = Date.now() - (await db.get("last_tag"))
 
-
     if (userIsTagged) {
-      interaction.reply({ content: `You have been tagged for ${parseTime(time)}`, ephemeral: true})
+      interaction.reply({ content: `You have been tagged for ${parseTime(time)}${time < 15*60*1000 ? ". ("+ parseTime(15*60*1000 - time) + " till cooldown ends)" : "" }`, ephemeral: true})
     } else {
       interaction.reply({ content: `The tagged person has been tagged for ${parseTime(time)}`, ephemeral: true})
     }
