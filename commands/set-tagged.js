@@ -5,7 +5,7 @@ const Keyv = require('keyv');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('set-tagged')
-		.setDescription("Overrides who is currently it. If not an admin, sets the sender as 'it'. Does not reset when the last tag happened.")
+		.setDescription("Overrides who is currently it. If not an admin, sets the sender as it.")
     .addUserOption(option => option.setName("user").setDescription("User to be set as 'it'. Can only be used if sender is an admin.")),
 	async execute(interaction, db) {
     // const db = new Keyv('sqlite://'+dbName);
