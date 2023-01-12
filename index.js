@@ -13,7 +13,7 @@ if (!fs.existsSync("./" + dbName)) {
 	console.log("generating Database");
 	fs.writeFileSync("./" + dbName, "")
 }
-const db = dev ? new Keyv('sqlite://'+dbName) : new Keyv('sqlite://'+devDatabaseName);
+const db = dev ? new Keyv('sqlite://'+devDatabaseName) : new Keyv('sqlite://'+dbName);
 
 //Finds Commands
 client.commands = new Collection();
