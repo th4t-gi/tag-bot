@@ -12,25 +12,28 @@ module.exports = {
       .setDescription("User to start off the game")
       .setRequired(true))
     .addBooleanOption(option => 
-      option.setName("clear").setDescription("If true, wipes the players times when starting.")),
+      option.setName("clear")
+      .setDescription("If true, wipes the players times when starting.")
+      .setRequired(true)),
 	async execute(interaction, db) {
     //Filter out only Admins
     if (!adminIds.includes(interaction.user.id)) {
       interaction.reply("Sorry, but you can't use this command!")
       return
     }
-    const clear = interaction.option.getBoolean("clear") || false
+    const clear = interaction.options.getBoolean("clear") || false
     const user = interaction.options.getUser('init_user');
     // const db = new Keyv('sqlite://'+dbName);
-
+    console.log(clear);
     if (clear) {
       db.clear()
     }
-    
-    await interaction.reply({ content: 'Let the glorious game of Tag Start!', components: [createTagButtonRow()] });
+    const text = clear ? 'Let the glorious game of Tag start!' : 'Let the glorious game of Tag continue!'
+    await interaction.reply({ content: text, components: [createTagButtonRow()] })
 
     db.set("current", user.id)
     db.set("last_tag", Date.now())
+    db.set("last_tag_msg", interaction.channel.lastMessageId)
     
 	},
 };

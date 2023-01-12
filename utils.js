@@ -40,7 +40,7 @@ module.exports = {
     let standings = [];
     //Get all ids of users
     for await (const [id, time] of db.iterator()) {
-      if (id !== "last_tag" && id !== "current") standings.push({id, time})
+      if (id.length == 18) standings.push({id, time})
     }
     console.log(standings);
     //Sort list by by time

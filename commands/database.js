@@ -36,12 +36,13 @@ module.exports = {
     //map user object to nickname/username and milisecond time to hh:mm:ss
     if (interaction.options.getBoolean("humanize")) {
       standings = await Promise.all(standings.map(async (v, i) => {
-        console.log(v);
         if (v.key == "last_tag") {
-          return {key: "last_tag", value: new Date(v.value).toLocaleString()}
+          return {key: v.key, value: new Date(v.value).toLocaleString()}
         } else if (v.key == "current") {
           const user = await interaction.guild.members.fetch(v.value)
-          return {key: "current", value: (user.nickname||user.user.username)}
+          return {key: v.key, value: (user.nickname||user.user.username)}
+        } else if (v.key == "last_tag_msg") {
+          return v
         } else {
           const user = await interaction.guild.members.fetch(v.key)
           return {key: (user.nickname||user.user.username), value: parseTime(v.value)}

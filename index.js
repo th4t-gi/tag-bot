@@ -1,6 +1,6 @@
 require('dotenv').config()
 const { Client, Collection, Events, GatewayIntentBits, Message, ActionRowBuilder, ButtonBuilder, ButtonStyle, UserSelectMenuBuilder, ActivityType } = require('discord.js');
-const { dbName, devDatabaseName, dev } = require('./config.json');
+const { dbName, devDatabaseName, dev, cooldown } = require('./config.json');
 const Keyv = require('keyv');
 const {parseTime, createTagButtonRow, updateStandings, getNickname} = require("./utils")
 
@@ -51,18 +51,23 @@ client.on(Events.InteractionCreate, async interaction => {
 	}
 	//When someone clicks the "I tagged someone Button"
 	if (interaction.isButton() && interaction.customId == "tag_button") {
+		await interaction.deferReply({ephemeral: true})
+		if (interaction.message.id !== (await db.get("last_tag_msg"))) {
+			interaction.editReply("This is an old button, there should be a newer one!")
+			return
+		}
+		
 		const curr = await db.get("current")
 		const time = Date.now() - (await db.get('last_tag'))
-		const cooldown = 15*60*1000
-		console.log(time, parseTime(cooldown));
+		// const cooldown = 15*60*1000
+		console.log(time);
 
 		//Filters out if the user isn't "it" and the cooldown
 		if (curr !== interaction.user.id) {
-			interaction.reply({ content: 'You are not it! You can\'t tag someone right now you silly goose! If you are it and the dumdum that tagged you selected the wrong person, use the /set-tagged command.', ephemeral: true })
+			interaction.editReply({ content: 'You can\'t tag someone right now you silly goose! You are not it!\nIf you are actually it and the dumdum that tagged you selected the wrong person, use the `/set-tagged` command and use the button again.', ephemeral: true })
 		} else if (time < cooldown) {
-			interaction.reply({ content: `Not yet you impatient fuck! You need to wait for ${parseTime(cooldown - time)}`, ephemeral: true })
+			interaction.editReply({ content: `Not yet you impatient fuck! You need to wait for ${parseTime(cooldown - time)}`, ephemeral: true })
 		} else {
-			await interaction.deferReply({ephemeral: true})
 			//creates Dropdown Menue
 			const userSelect = new ActionRowBuilder().addComponents(
       	new UserSelectMenuBuilder()
@@ -72,24 +77,28 @@ client.on(Events.InteractionCreate, async interaction => {
    	  );
 			await interaction.editReply({content: `Who did you tag ${await getNickname(interaction, interaction.user.id)}? It's okay, you can tell me`, ephemeral: true, components: [userSelect]})
 			console.log("[tagging_button]");
-			interaction.message.delete()
 		}
 	}
 	//When the user selects who they tagged
 	if (interaction.isUserSelectMenu() && interaction.customId == "userSelect") {
-		await interaction.reply(`<@${interaction.user.id}> has tagged someone!`)
 		const milliseconds = Date.now() - await db.get("last_tag")
 		console.log("[userSelect] - time added", milliseconds)
-		console.log("[userSelect]{interaction.message}", interaction.message);
+
+		await interaction.reply(`<@${interaction.user.id}> has tagged someone!`)
 		//Updates user's time
 		await db.set(interaction.user.id, (await db.get(interaction.user.id)) + milliseconds)
-
-		interaction.followUp({ content: 'Let the glorious game of Tag continue!', components: [createTagButtonRow()] })
 		
 		updateStandings(interaction, db)
 
 		db.set("current", interaction.users.first().id)
 		db.set("last_tag", Date.now())
+		db.get("last_tag_msg").then(async msgId => {
+			(await interaction.channel.messages.fetch(msgId)).delete()
+		})
+
+		interaction.followUp({ content: 'Let the glorious game of Tag continue!', components: [createTagButtonRow()] }).then(msg => {
+			db.set("last_tag_msg", msg.id)
+		})
 	}
 	
 });

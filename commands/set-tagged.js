@@ -15,7 +15,7 @@ module.exports = {
     if (!adminIds.includes(interaction.user.id)) {
       console.log("set tagged", interaction.user.id);
       db.set('current', interaction.user.id)
-      interaction.reply({content: "Okay, you are now it! If you aren't it, tell Evan or Judd to set who is actually it!", ephemeral: true})
+      interaction.reply({content: "Okay, you are now it! Use the button to tag someone else! If you aren't it, tell Evan or Judd to set who is actually it!", ephemeral: true})
       return
     } else {
       console.log("set tagged", user.id);
