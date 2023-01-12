@@ -10,16 +10,22 @@ module.exports = {
     .addBooleanOption(option =>
       option.setName('humanize')
         .setDescription('Humanizes the time and ID\'s')
-        
+    ).addBooleanOption(option =>
+      option.setName('dev')
+        .setDescription('Uses the dev database or not. Defaults to false')
     ),
 	async execute(interaction, db) {
-    // const db = new Keyv('sqlite://'+dbName);    
     //Filter out only Admins
     if (!adminIds.includes(interaction.user.id)) {
       interaction.reply("Sorry, but you can't use this command!")
       return
-    } 
+    }
     await interaction.deferReply()
+    if (interaction.options.getBoolean("dev")) {
+      db = new Keyv('sqlite://'+devDatabaseName);
+    } else {
+      db = new Keyv('sqlite://'+dbName);
+    }
     let standings = [];
     //Get all ids of users
     for await (const [key, value] of db.iterator()) {
@@ -43,6 +49,6 @@ module.exports = {
       }))
     }
 
-    interaction.editReply("Here's the `" + (dev? devDatabaseName:dbName) + "` right now!\n```json\n" + JSON.stringify(standings) + "```")
+    interaction.editReply("Here's the `" + (interaction.options.getBoolean("dev")? devDatabaseName:dbName) + "` right now!\n```json\n" + JSON.stringify(standings) + "```")
   }
 }
