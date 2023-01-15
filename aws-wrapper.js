@@ -30,7 +30,7 @@ const AWSWrapper = class AWSWrapper {
   }
 
   async updateCache() {
-    // console.log("last Cache",);
+    console.log("caching");
     this.scan().then(data => {
       this.cache = data
     })
