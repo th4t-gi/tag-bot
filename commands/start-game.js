@@ -30,9 +30,9 @@ module.exports = {
     if (clear) {
       const standings = dynamo.getCache("standings")
       console.log(standings);
-      interaction.guild.channels.fetch(standings.channel).then(channel => {
-        channel.messages.delete(standings.msg)
-      })
+      interaction.guild.channels.fetch(standings?.channel).then(channel => {
+        channel.messages.delete(standings?.msg)
+      }).catch(console.error)
       await dynamo.clear()
     }
     const text = clear ? 'Let the glorious game of Tag start!' : 'Let the glorious game of Tag continue!'
