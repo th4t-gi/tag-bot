@@ -33,7 +33,7 @@ const AWSWrapper = class AWSWrapper {
     console.log("caching");
     this.scan().then(data => {
       this.cache = data
-      console.log("cached", this.cache);
+      console.log("cached", Object.keys(data));
     })
   }
 

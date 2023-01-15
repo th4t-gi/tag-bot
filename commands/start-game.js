@@ -31,7 +31,7 @@ module.exports = {
       const standings = dynamo.getCache("standings")
       console.log(standings);
       interaction.guild.channels.fetch(standings?.channel).then(channel => {
-        channel.messages.delete(standings?.msg)
+        channel.messages?.delete(standings?.msg)
       }).catch(console.error)
       await dynamo.clear()
     }
