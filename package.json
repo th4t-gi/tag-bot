@@ -11,15 +11,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@keyv/sqlite": "^3.6.4",
-    "@types/keyv": "^4.2.0",
+    "aws-sdk": "^2.1294.0",
     "discord.js": "^14.7.1",
     "dotenv": "^16.0.3",
     "nodemon": "^2.0.20",
     "sqlite3": "^5.1.4"
   },
   "devDependencies": {
-    "mocha": "^10.2.0",
-    "wrangler": "^2.7.1"
+    "mocha": "^10.2.0"
   }
 }

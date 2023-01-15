@@ -1,24 +1,24 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { dbName, cooldown } = require("../config.json")
-const Keyv = require('keyv');
+const { cooldown } = require("../config.json")
 const {parseTime} = require('../utils')
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('current')
 		.setDescription('checks how long the current player has been tagged'),
-	async execute(interaction, db) {
-    // const db = new Keyv('sqlite://'+dbName);
-    const userIsTagged = interaction.user.id == (await db.get("current"))
-    console.log(await db.get("current"));
-    console.log("[/current]{last_tag}", await db.get('last_tag'));
+	async execute(interaction, dynamo) {
+    // await interaction.deferReply()
+    // const curr = await dynamo.get("current")
+    const curr = dynamo.getCache("current")
+    const userIsTagged = interaction.user.id == curr.user_id
+    console.log("[/current]{last_tag}", curr.last_tag);
 
-    const time = Date.now() - (await db.get("last_tag"))
+    const time = Date.now() - curr.last_tag
 
     if (userIsTagged) {
-      interaction.reply({ content: `You have been tagged for ${parseTime(time)}${time < cooldown ? ". ("+ parseTime(cooldown - time) + " till cooldown ends)" : "" }`, ephemeral: true})
+      return interaction.reply({ content: `You have been tagged for ${parseTime(time)}${time < cooldown ? ". ("+ parseTime(cooldown - time) + " till cooldown ends)" : "" }`, ephemeral: true})
     } else {
-      interaction.reply({ content: `The tagged person has been tagged for ${parseTime(time)}`, ephemeral: true})
+      return interaction.reply({ content: `The tagged person has been tagged for ${parseTime(time)}`, ephemeral: true})
     }
 	},
 };

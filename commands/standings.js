@@ -6,12 +6,12 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('standings')
 		.setDescription('Prints out the list of all players and their times'),
-	async execute(interaction, db, dev) {
+	async execute(interaction, db) {
     const standingsChannelId = "1061475249796948048"
     // await interaction.deferReply()
     // const db = new Keyv('sqlite://'+dbName);
 
-    if (dev || adminIds.includes(interaction.user.id)) updateStandings(interaction, db)
+    if (process.env.DEV || adminIds.includes(interaction.user.id)) updateStandings(interaction, db)
     interaction.reply(`UPDATE: Check <#${standingsChannelId}> now instead!, you don't have to use the command!`)
     // //Make Standings object
     // let standings = [];
