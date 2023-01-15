@@ -29,6 +29,7 @@ module.exports = {
     await interaction.deferReply()
     if (clear) {
       const standings = dynamo.getCache("standings")
+      console.log(standings);
       interaction.guild.channels.fetch(standings.channel).then(channel => {
         channel.messages.delete(standings.msg)
       })
