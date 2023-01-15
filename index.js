@@ -28,7 +28,7 @@ const dynamo = new AWSWrapper(
   (process.env.DEV ? "dev-" : "") + "tag-game",
   "id"
 );
-console.log("Connected to ", dynamo.table, dynamo.cache);
+console.log("Connected to ", dynamo.table);
 //Finds Commands
 client.commands = new Collection();
 const commandsPath = path.join(__dirname, "commands");
