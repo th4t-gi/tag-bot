@@ -1,11 +1,8 @@
 require("dotenv").config();
 const AWS = require("aws-sdk");
+const { DynamoDBClient, ListTablesCommand } = require("@aws-sdk/client-dynamodb");
 
 const AWSWrapper = class AWSWrapper {
-  dynamo;
-  table;
-  partitionId;
-  cache;
 
   constructor(table, partitionId) {
     this.table = table;
@@ -17,6 +14,7 @@ const AWSWrapper = class AWSWrapper {
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     });
     // Create the service used to connect to DynamoDB
+    this.dynamoClient = new DynamoDBClient({region: process.env.AWS_DEFAULT_REGION})
     this.dynamo = new AWS.DynamoDB.DocumentClient();
     this.updateCache()
   }
@@ -27,6 +25,15 @@ const AWSWrapper = class AWSWrapper {
 
   getCache(key) {
     return key ? this.cache[key] : this.cache
+  }
+
+  getTables() {
+    return new Promise((resolve, reject) => {
+      this.dynamoClient.send(new ListTablesCommand({})).then((res) => {
+        
+        resolve(res.TableNames);
+      }).catch(reject);
+    });
   }
 
   async updateCache() {
@@ -134,9 +141,10 @@ const AWSWrapper = class AWSWrapper {
 
 };
 
-// const wrapper = new AWSWrapper("tag-game", "id");
+// const wrapper = new AWSWrapper("dev-tag-game", "id");
 // const devWrapper = new AWSWrapper("dev-tag-game", "id");
 
+// wrapper.getTables().then(console.log)
 // console.log(wrapper.getDocClient());
 // wrapper.get("current").then(console.log);
 // wrapper.set("1", { time: 20, times_tagged: 0, name: "asdf" })
@@ -152,6 +160,7 @@ const AWSWrapper = class AWSWrapper {
 //     wrapper.scan().then(console.log)
 //   })
 // })
+
 
 // devWrapper.clear()
 // wrapper.get("2").then(console.log)

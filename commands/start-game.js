@@ -1,6 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js');
-const {  adminIds } = require("../config.json")
+const {  adminIds, tables } = require("../config.json")
 const { createTagButtonRow } = require('../utils');
+
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -31,7 +32,9 @@ module.exports = {
       const standings = dynamo.getCache("standings")
       console.log(standings);
       interaction.guild.channels.fetch(standings?.channel).then(channel => {
-        channel.messages?.delete(standings?.msg)
+        channel.messages?.fetch(standings?.msg).then(msg => {
+          msg?.delete();
+        })
       }).catch(console.error)
       await dynamo.clear()
     }

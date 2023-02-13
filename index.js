@@ -8,7 +8,7 @@ const {
   UserSelectMenuBuilder,
   ActivityType,
 } = require("discord.js");
-const { cooldown } = require("./config.json");
+const { cooldown, tables } = require("./config.json");
 const { parseTime, createTagButtonRow, updateStandings } = require("./utils");
 
 const fs = require("node:fs");
@@ -25,7 +25,7 @@ const client = new Client({
 });
 
 const dynamo = new AWSWrapper(
-  (process.env.DEV ? "dev-" : "") + "tag-game",
+  process.env.DEV? tables[1] : tables[0],
   "id"
 );
 console.log("Connected to ", dynamo.table);
@@ -140,7 +140,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
         user.time += milliseconds;
         dynamo.set(interaction.user.id, user);
       })
-      .finally(() => {
+      .finally(async () => {
+        await dynamo.updateCache()
         updateStandings(interaction, dynamo);
       });
 
